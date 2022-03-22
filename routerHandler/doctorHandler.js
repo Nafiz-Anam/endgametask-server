@@ -23,6 +23,53 @@ router.get("/", async (req, res) => {
             console.log(err);
         });
 });
+router.get("/masterdoc", async (req, res) => {
+    await Doctor.find()
+        .select("_id doc_name doc_email")
+        .exec()
+        .then((docs) => {
+            const response = {
+                count: docs.length,
+                result: docs,
+            };
+            res.status(200).json(response);
+        });
+});
+router.get("/prodoc", async (req, res) => {
+    // const id = req.params.id;
+    // console.log(req.query);
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.size);
+    try {
+        const doctors = await Doctor.find()
+            .limit(limit * 1)
+            .skip(page * limit)
+            .exec();
+
+        // const count = reviews.length;
+        const count = await Doctor.countDocuments();
+
+        res.json({
+            doctors,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            total: count,
+        });
+    } catch (err) {
+        console.error(err.message);
+    }
+
+    // await Doctor.find()
+    //     .select("_id doc_name doc_email")
+    //     .exec()
+    //     .then((docs) => {
+    //         const response = {
+    //             count: docs.length,
+    //             result: docs,
+    //         };
+    //         res.status(200).json(response);
+    //     });
+});
 router.get("/:id", async (req, res) => {
     const id = req.params?.id;
     // console.log(id);
